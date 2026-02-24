@@ -14,18 +14,21 @@ function SearchBar() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
+    <form
+      onSubmit={handleSubmit}
+      className="relative w-full sm:w-[320px] md:w-95"
+    >
       <input
         type="text"
         placeholder="Search city..."
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        className="bg-white/20 backdrop-blur-md rounded-full px-6 py-3 w-64 sm:w-80 text-white placeholder-white/70 outline-none focus:ring-2 focus:ring-white/50 transition"
+        className="w-full bg-white/20 backdrop-blur-xl rounded-full py-3 pl-6 pr-12 text-white placeholder-white/70 outline-none focus:ring-2 focus:ring-white/40 transition"
       />
 
       <button
         type="submit"
-        className="absolute right-3 top-1/2 -translate-y-1/2"
+        className="absolute right-4 top-1/3 -translate-y-1/2 flex items-center justify-center"
       >
         <img
           src={searchIcon}
