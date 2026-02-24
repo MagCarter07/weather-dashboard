@@ -60,42 +60,53 @@ function Home() {
     return snowyBg;
   };
 
-  return (
-    <div
-      className="min-h-screen bg-cover bg-center relative transition-all duration-700"
-      style={{ backgroundImage: `url(${getBackground()})` }}
-    >
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+ return (
+  <div
+    className="min-h-screen bg-cover bg-center relative transition-all duration-700"
+    style={{ backgroundImage: `url(${getBackground()})` }}
+  >
+    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
-      <div className="relative z-10 px-6 sm:px-12 py-10 text-white">
-        <div className="flex flex-col sm:flex-row justify-between gap-6">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-semibold">
-              {weatherData?.city || cityName || "London"}
-            </h1>
-            <p className="opacity-80">{new Date().toDateString()}</p>
-          </div>
+    <div className="relative z-10 min-h-screen flex flex-col text-white">
 
-          <SearchBar />
+      {/* Header */}
+      <div className="w-full max-w-6xl mx-auto px-6 pt-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+
+        <div>
+          <h1 className="text-3xl md:text-4xl font-semibold">
+            {weatherData?.city || cityName || "London"}
+          </h1>
+          <p className="opacity-80">
+            {new Date().toDateString()}
+          </p>
         </div>
 
-        {loading && <SkeletonLoader />}
-
-        {error && !loading && (
-          <div className="mt-10">
-            <ErrorMessage message={error} />
-          </div>
-        )}
-
-        {weatherData && !loading && !error && (
-          <div className="mt-12 flex flex-col lg:flex-row gap-8">
-            <CurrentWeatherCard current={weatherData.current} />
-            <ForecastCard forecast={weatherData.forecast} />
-          </div>
-        )}
+        <SearchBar />
       </div>
+
+      {/* Content */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-10">
+
+          {loading && <SkeletonLoader />}
+
+          {error && !loading && (
+            <ErrorMessage message={error} />
+          )}
+
+          {weatherData && !loading && !error && (
+            <>
+              <CurrentWeatherCard current={weatherData.current} />
+              <ForecastCard forecast={weatherData.forecast} />
+            </>
+          )}
+
+        </div>
+      </div>
+
     </div>
-  );
+  </div>
+);
 }
 
 export default Home;
