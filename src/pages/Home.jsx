@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { fetchWeatherData } from "../services/weatherService";
 import SearchBar from "../components/SearchBar";
 import CurrentWeatherCard from "../components/CurrentWeatherCard";
@@ -15,7 +15,6 @@ import nightBg from "../assets/backgrounds/night.jpg";
 
 function Home() {
   const { cityName } = useParams();
-  const navigate = useNavigate();
 
   const [weatherData, setWeatherData] = useState(null);
   const [error, setError] = useState("");
@@ -25,11 +24,19 @@ function Home() {
     try {
       setLoading(true);
       setError("");
+      setWeatherData(null);
+
       const data = await fetchWeatherData(city);
+
+      // Safety check
+      if (!data || !data.current) {
+        throw new Error("Invalid data");
+      }
+
       setWeatherData(data);
     } catch {
       setError("City not found.");
-      navigate("/");
+      setWeatherData(null);
     } finally {
       setLoading(false);
     }
@@ -40,11 +47,11 @@ function Home() {
   }, [cityName]);
 
   const getBackground = () => {
-    if (!weatherData) return snowyBg;
+    if (!weatherData?.current) return snowyBg;
 
-    const text = weatherData.current.WeatherText.toLowerCase();
+    const text = weatherData.current?.WeatherText?.toLowerCase() || "";
 
-    if (weatherData.current.IsDayTime === false) return nightBg;
+    if (weatherData.current?.IsDayTime === false) return nightBg;
     if (text.includes("rain")) return rainyBg;
     if (text.includes("snow")) return snowyBg;
     if (text.includes("cloud")) return cloudyBg;
@@ -64,7 +71,7 @@ function Home() {
         <div className="flex flex-col sm:flex-row justify-between gap-6">
           <div>
             <h1 className="text-3xl sm:text-4xl font-semibold">
-              {weatherData?.city}
+              {weatherData?.city || cityName || "London"}
             </h1>
             <p className="opacity-80">{new Date().toDateString()}</p>
           </div>
@@ -73,9 +80,14 @@ function Home() {
         </div>
 
         {loading && <SkeletonLoader />}
-        {error && <ErrorMessage message={error} />}
 
-        {weatherData && !loading && (
+        {error && !loading && (
+          <div className="mt-10">
+            <ErrorMessage message={error} />
+          </div>
+        )}
+
+        {weatherData && !loading && !error && (
           <div className="mt-12 flex flex-col lg:flex-row gap-8">
             <CurrentWeatherCard current={weatherData.current} />
             <ForecastCard forecast={weatherData.forecast} />

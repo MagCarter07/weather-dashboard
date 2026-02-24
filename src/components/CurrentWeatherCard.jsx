@@ -4,63 +4,48 @@ import highIcon from "../assets/icons/high-temperature.png";
 import lowIcon from "../assets/icons/low-temperature.png";
 
 function CurrentWeatherCard({ current }) {
-  // If no data yet → don't render
   if (!current) return null;
 
-  const temperature = current?.Temperature?.Metric?.Value;
-  const weatherText = current?.WeatherText;
-  const windSpeed = current?.Wind?.Speed?.Metric?.Value;
-  const humidity = current?.RelativeHumidity;
+  const temperature = Math.round(current?.Temperature?.Metric?.Value ?? 0);
+  const weatherText = current?.WeatherText ?? "";
+  const windSpeed = Math.round(current?.Wind?.Speed?.Metric?.Value ?? 0);
+  const humidity = current?.RelativeHumidity ?? 0;
+
+  const high = temperature + 2;
+  const low = temperature - 2;
 
   return (
-    <div className="bg-white/20 backdrop-blur-lg rounded-3xl p-10 w-full lg:w-[500px] shadow-xl text-white">
+    <div className="w-full lg:w-[520px] bg-white/15 backdrop-blur-2xl rounded-3xl p-8 md:p-10 shadow-2xl border border-white/20">
+      {/* Temperature */}
       <div>
-        <h2 className="text-7xl font-bold">{temperature ?? "--"}°</h2>
-        <p className="text-xl mt-2">{weatherText ?? "Loading..."}</p>
+        <h2 className="text-6xl md:text-7xl font-bold tracking-tight">
+          {temperature}°
+        </h2>
+        <p className="text-lg md:text-xl opacity-80 mt-2 capitalize">
+          {weatherText}
+        </p>
       </div>
 
-      <hr className="my-8 border-white/30" />
+      <hr className="my-8 border-white/20" />
 
+      {/* Weather Details */}
       <div className="grid grid-cols-2 gap-6">
-        {/* Humidity */}
-        <div className="flex items-center gap-4">
-          <img src={humidityIcon} alt="" className="w-6 h-6" />
-          <div>
-            <p className="text-sm opacity-70">Humidity</p>
-            <p className="font-semibold">{humidity ?? "--"}%</p>
-          </div>
-        </div>
+        <Detail icon={humidityIcon} label="Humidity" value={`${humidity}%`} />
+        <Detail icon={windIcon} label="Wind" value={`${windSpeed} km/h`} />
+        <Detail icon={highIcon} label="High" value={`${high}°`} />
+        <Detail icon={lowIcon} label="Low" value={`${low}°`} />
+      </div>
+    </div>
+  );
+}
 
-        {/* Wind */}
-        <div className="flex items-center gap-4">
-          <img src={windIcon} alt="" className="w-6 h-6" />
-          <div>
-            <p className="text-sm opacity-70">Wind</p>
-            <p className="font-semibold">{windSpeed ?? "--"} km/h</p>
-          </div>
-        </div>
-
-        {/* High */}
-        <div className="flex items-center gap-4">
-          <img src={highIcon} alt="" className="w-6 h-6" />
-          <div>
-            <p className="text-sm opacity-70">High</p>
-            <p className="font-semibold">
-              {temperature ? temperature + 2 : "--"}°
-            </p>
-          </div>
-        </div>
-
-        {/* Low */}
-        <div className="flex items-center gap-4">
-          <img src={lowIcon} alt="" className="w-6 h-6" />
-          <div>
-            <p className="text-sm opacity-70">Low</p>
-            <p className="font-semibold">
-              {temperature ? temperature - 2 : "--"}°
-            </p>
-          </div>
-        </div>
+function Detail({ icon, label, value }) {
+  return (
+    <div className="flex items-center gap-4">
+      <img src={icon} alt={label} className="w-6 h-6 object-contain" />
+      <div>
+        <p className="text-sm opacity-70">{label}</p>
+        <p className="font-semibold text-lg">{value}</p>
       </div>
     </div>
   );
