@@ -1,11 +1,22 @@
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { fetchWeatherData } from "../services/weatherService";
 import SearchBar from "../components/SearchBar";
 import CurrentWeatherCard from "../components/CurrentWeatherCard";
 import ForecastCard from "../components/ForecastCard";
 import ErrorMessage from "../components/ErrorMessage";
-import { fetchWeatherData } from "../services/weatherService";
+import SkeletonLoader from "../components/SkeletonLoader";
+
+import snowyBg from "../assets/backgrounds/snowy-mountains.jpg";
+import sunnyBg from "../assets/backgrounds/sunny.jpg";
+import rainyBg from "../assets/backgrounds/rainy.jpg";
+import cloudyBg from "../assets/backgrounds/cloudy.jpg";
+import nightBg from "../assets/backgrounds/night.jpg";
 
 function Home() {
+  const { cityName } = useParams();
+  const navigate = useNavigate();
+
   const [weatherData, setWeatherData] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -17,41 +28,55 @@ function Home() {
       const data = await fetchWeatherData(city);
       setWeatherData(data);
     } catch {
-      setError("Unable to fetch weather. Please try again.");
+      setError("City not found.");
+      navigate("/");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadWeather("London");
-  }, []);
+    loadWeather(cityName || "London");
+  }, [cityName]);
+
+  const getBackground = () => {
+    if (!weatherData) return snowyBg;
+
+    const text = weatherData.current.WeatherText.toLowerCase();
+
+    if (weatherData.current.IsDayTime === false) return nightBg;
+    if (text.includes("rain")) return rainyBg;
+    if (text.includes("snow")) return snowyBg;
+    if (text.includes("cloud")) return cloudyBg;
+    if (text.includes("sun")) return sunnyBg;
+
+    return snowyBg;
+  };
 
   return (
     <div
-      className="min-h-screen bg-cover bg-center relative"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1482192596544-9eb780fc7f66')",
-      }}
+      className="min-h-screen bg-cover bg-center relative transition-all duration-700"
+      style={{ backgroundImage: `url(${getBackground()})` }}
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
 
-      <div className="relative z-10 px-12 py-10 text-white">
-        <div className="flex justify-between items-start">
+      <div className="relative z-10 px-6 sm:px-12 py-10 text-white">
+        <div className="flex flex-col sm:flex-row justify-between gap-6">
           <div>
-            <h1 className="text-3xl font-semibold">{weatherData?.city}</h1>
-            <p className="text-sm opacity-80">{new Date().toDateString()}</p>
+            <h1 className="text-3xl sm:text-4xl font-semibold">
+              {weatherData?.city}
+            </h1>
+            <p className="opacity-80">{new Date().toDateString()}</p>
           </div>
 
-          <SearchBar onSearch={loadWeather} />
+          <SearchBar />
         </div>
 
-        {loading && <p className="mt-6">Loading...</p>}
+        {loading && <SkeletonLoader />}
         {error && <ErrorMessage message={error} />}
 
         {weatherData && !loading && (
-          <div className="mt-12 flex gap-10">
+          <div className="mt-12 flex flex-col lg:flex-row gap-8">
             <CurrentWeatherCard current={weatherData.current} />
             <ForecastCard forecast={weatherData.forecast} />
           </div>
