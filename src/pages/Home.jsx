@@ -1,80 +1,62 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import SearchBar from "../components/SearchBar";
-import WeatherCard from "../components/WeatherCard";
+import CurrentWeatherCard from "../components/CurrentWeatherCard";
+import ForecastCard from "../components/ForecastCard";
 import ErrorMessage from "../components/ErrorMessage";
+import { fetchWeatherData } from "../services/weatherService";
 
 function Home() {
-  const [weather, setWeather] = useState(null);
+  const [weatherData, setWeatherData] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const API_KEY = import.meta.env.VITE_ACCUWEATHER_API_KEY;
-
-  const fetchWeather = async (city) => {
+  const loadWeather = async (city) => {
     try {
       setLoading(true);
       setError("");
-      setWeather(null);
-
-      // STEP 1: Get Location Key
-      const locationResponse = await axios.get(
-        `https://dataservice.accuweather.com/locations/v1/cities/search`,
-        {
-          params: {
-            apikey: API_KEY,
-            q: city,
-          },
-        },
-      );
-
-      if (!locationResponse.data.length) {
-        throw new Error("City not found");
-      }
-
-      const locationKey = locationResponse.data[0].Key;
-
-      // STEP 2: Get Current Conditions
-      const weatherResponse = await axios.get(
-        `https://dataservice.accuweather.com/currentconditions/v1/${locationKey}`,
-        {
-          params: {
-            apikey: API_KEY,
-          },
-        },
-      );
-
-      setWeather({
-        city: locationResponse.data[0].LocalizedName,
-        temperature: weatherResponse.data[0].Temperature.Metric.Value,
-        weatherText: weatherResponse.data[0].WeatherText,
-        weatherIcon: weatherResponse.data[0].WeatherIcon,
-        isDayTime: weatherResponse.data[0].IsDayTime,
-      });
-    } catch (err) {
-      setError("Unable to fetch weather. Please check the city name.");
+      const data = await fetchWeatherData(city);
+      setWeatherData(data);
+    } catch {
+      setError("Unable to fetch weather. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchWeather("London");
+    loadWeather("London");
   }, []);
 
   return (
-    <div className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 text-white">
-      <h1 className="text-3xl sm:text-4xl font-bold text-center mb-8">
-        Weather Dashboard
-      </h1>
+    <div
+      className="min-h-screen bg-cover bg-center relative"
+      style={{
+        backgroundImage:
+          "url('https://images.unsplash.com/photo-1482192596544-9eb780fc7f66')",
+      }}
+    >
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
 
-      <SearchBar onSearch={fetchWeather} />
+      <div className="relative z-10 px-12 py-10 text-white">
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-semibold">{weatherData?.city}</h1>
+            <p className="text-sm opacity-80">{new Date().toDateString()}</p>
+          </div>
 
-      {loading && <p className="text-center mt-6">Loading...</p>}
+          <SearchBar onSearch={loadWeather} />
+        </div>
 
-      {error && <ErrorMessage message={error} />}
+        {loading && <p className="mt-6">Loading...</p>}
+        {error && <ErrorMessage message={error} />}
 
-      {weather && !loading && <WeatherCard weather={weather} />}
+        {weatherData && !loading && (
+          <div className="mt-12 flex gap-10">
+            <CurrentWeatherCard current={weatherData.current} />
+            <ForecastCard forecast={weatherData.forecast} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

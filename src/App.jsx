@@ -1,10 +1,13 @@
+import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 to-indigo-600">
-      <Home />
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 

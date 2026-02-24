@@ -11,18 +11,18 @@ function SearchBar({ onSearch }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+    <form onSubmit={handleSubmit} className="relative">
       <input
         type="text"
-        placeholder="Enter city name..."
+        placeholder="Search city..."
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        className="flex-1 p-3 rounded-md text-black"
+        className="bg-white/20 backdrop-blur-md rounded-full px-6 py-3 w-72 text-white placeholder-white/70 outline-none focus:ring-2 focus:ring-white/50 transition"
       />
 
       <button
         type="submit"
-        className="bg-black text-white px-6 py-3 rounded-md hover:bg-gray-800 transition"
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/40 text-white px-4 py-1.5 rounded-full transition"
       >
         Search
       </button>
